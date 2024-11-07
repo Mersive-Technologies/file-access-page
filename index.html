@@ -2,29 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Protected File Access</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        #fileLink { display: none; }
-    </style>
+    <title>Access File</title>
 </head>
 <body>
     <h2>Enter Password to Access the File</h2>
-    <input type="password" id="passwordInput" placeholder="Enter Password">
-    <button onclick="checkPassword()">Submit</button>
-    
-    <div id="fileLink">
-        <p>Access your file here: <a href="SIGNED_URL" target="_blank">Download File</a></p>
+    <input type="password" id="password" placeholder="Enter Password">
+    <button onclick="accessFile()">Submit</button>
+    <div id="linkContainer" style="display:none;">
+        <p>Access your file here: <a id="fileLink" href="#" target="_blank">Download File</a></p>
     </div>
 
     <script>
-        function checkPassword() {
-            const password = "PASSWORD";  // Set your password here
-            const userInput = document.getElementById("passwordInput").value;
-            
-            if (userInput === password) {
-                document.getElementById("fileLink").style.display = "block";
+        async function accessFile() {
+            const password = document.getElementById("password").value;
+            const response = await fetch("https://us-central1-mersive-techops-project.cloudfunctions.net/generateSignedUrl?bucketName=mersive-yocto-dev&fileName=_20241002_032753.tar.gz", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById("fileLink").href = data.signedUrl;
+                document.getElementById("linkContainer").style.display = "block";
             } else {
                 alert("Incorrect password. Please try again.");
             }
